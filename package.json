@@ -14,10 +14,16 @@
     "preview": "vite preview"
   },
   "build": {
+    "appId": "com.bakou.guitartabs",
     "productName": "GuitarTabs",
     "directories": {
       "output": "release"
     },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
     "linux": {
       "target": [
         "AppImage",
