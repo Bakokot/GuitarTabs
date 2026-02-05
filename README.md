@@ -26,6 +26,7 @@ A modern, offline-first desktop application for guitarists to manage, create, an
 
 ### Installation
 
+#### Linux / macOS
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/guitar-tabs-app.git
@@ -42,15 +43,53 @@ A modern, offline-first desktop application for guitarists to manage, create, an
    npm run dev
    ```
 
+#### Windows (PowerShell)
+1. Install Node.js if you haven't (requires Admin or use `winget`):
+   ```powershell
+   winget install OpenJS.NodeJS.LTS
+   ```
+
+2. Clone and navigate:
+   ```powershell
+   git clone https://github.com/yourusername/guitar-tabs-app.git
+   cd guitar-tabs-app
+   ```
+
+3. If you encounter execution policy errors when running npm scripts, run:
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+
+4. Install dependencies:
+   ```powershell
+   npm install
+   ```
+
+5. Start the application in development mode:
+   ```powershell
+   npm run dev
+   ```
+
 ### Building for Production
 
-To create a distributable package for your OS:
+To create a distributable package:
 
-```bash
-npm run build
-```
+- **For your current platform:**
+  ```bash
+  npm run build
+  ```
 
-The installer will be generated in the `dist` directory.
+- **Specifically for Windows (creates Installer + Portable):**
+  ```bash
+  npm run build:win
+  ```
+
+- **Specifically for Linux (creates AppImage + Snap):**
+  ```bash
+  npm run build:linux
+  ```
+
+The installers will be generated in the `release/` directory.
 
 ## 🛠️ Technology Stack
 
