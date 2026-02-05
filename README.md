@@ -1,3 +1,5 @@
+This has been coded with AI help as a quick experiment.
+
 # Guitar Tabs App
 
 A modern, offline-first desktop application for guitarists to manage, create, and organize their song collection with interactive tablature and chord editors.
