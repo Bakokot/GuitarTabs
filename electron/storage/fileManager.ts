@@ -33,7 +33,12 @@ export async function ensureDataDir() {
 export async function getSongs(): Promise<SongMetadata[]> {
     await ensureDataDir();
     const data = await fs.readFile(INDEX_FILE, 'utf-8');
-    return JSON.parse(data);
+    const songs: any[] = JSON.parse(data);
+    return songs.map(s => ({
+        id: s.id,
+        title: s.title,
+        artist: s.artist || ''
+    }));
 }
 
 export async function getSong(id: string): Promise<Song | null> {
@@ -58,7 +63,7 @@ export async function saveSong(song: Song): Promise<void> {
     // 2. Update index
     const songs = await getSongs();
     const index = songs.findIndex(s => s.id === song.id);
-    const metadata: SongMetadata = { id: song.id, title: song.title };
+    const metadata: SongMetadata = { id: song.id, title: song.title, artist: song.artist };
 
     if (index >= 0) {
         songs[index] = metadata;

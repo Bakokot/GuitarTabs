@@ -68,7 +68,12 @@ async function ensureDataDir() {
 async function getSongs() {
     await ensureDataDir();
     const data = await fs.readFile(INDEX_FILE, 'utf-8');
-    return JSON.parse(data);
+    const songs = JSON.parse(data);
+    return songs.map(s => ({
+        id: s.id,
+        title: s.title,
+        artist: s.artist || ''
+    }));
 }
 async function getSong(id) {
     await ensureDataDir();
@@ -90,7 +95,7 @@ async function saveSong(song) {
     // 2. Update index
     const songs = await getSongs();
     const index = songs.findIndex(s => s.id === song.id);
-    const metadata = { id: song.id, title: song.title };
+    const metadata = { id: song.id, title: song.title, artist: song.artist };
     if (index >= 0) {
         songs[index] = metadata;
     }

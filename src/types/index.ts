@@ -46,6 +46,7 @@ export interface Song {
 export interface SongMetadata {
     id: string;
     title: string;
+    artist: string;
 }
 
 export interface AppSettings {
