@@ -9,13 +9,14 @@ A modern, offline-first desktop application for guitarists to manage, create, an
 
 ## ✨ Features
 
+- **Full Preview Mode**: A dedicated, distraction-free reading mode to view your songs beautifully without the clutter of the editor.
+- **Instant Search**: A powerful lookup bar on the main menu allows you to filter your collection by song title or artist name in real-time.
 - **Interactive Tablature Editor**: Create ASCII tabs visually by selecting strings and entering fret numbers (0-24). No more manual formatting!
 - **Chords & Lyrics System**: Place chords exactly above the corresponding words in your lyrics with an intuitive "click-to-position" interface.
 - **Enhanced Metadata**: Track **Artist names**, Keys, Tempo, and Capo positions for every song.
-- **Instant Search**: A powerful lookup bar on the main menu allows you to filter your collection by song title or artist name in real-time.
 - **Configurable Storage**: Choose exactly where your song data is stored. Perfect for syncing with Dropbox, Google Drive, or external drives.
 - **Automatic Data Migration**: When you change your storage path, the app automatically moves your existing songs to the new location.
-- **Modern UI/UX**: Clean, responsive interface built with React and Vanilla CSS, featuring premium aesthetics, hover animations, and elevation effects.
+- **Modern UI/UX**: Clean, responsive interface built with React and Vanilla CSS, featuring premium aesthetics, hover animations, elevation effects, and a dedicated reading experience.
 - **Offline First**: All your data is stored locally on your machine.
 
 ## 🚀 Getting Started

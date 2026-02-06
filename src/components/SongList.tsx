@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { SongMetadata } from '../types';
 
 interface SongListProps {
+    onView: (id: string) => void;
     onEdit: (id: string) => void;
     onNew: () => void;
     onSettings: () => void;
 }
 
-export const SongList: React.FC<SongListProps> = ({ onEdit, onNew, onSettings }) => {
+export const SongList: React.FC<SongListProps> = ({ onView, onEdit, onNew, onSettings }) => {
     const [songs, setSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -31,6 +32,11 @@ export const SongList: React.FC<SongListProps> = ({ onEdit, onNew, onSettings })
             await window.api.deleteSong(id);
             loadSongs();
         }
+    };
+
+    const handleEdit = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        onEdit(id);
     };
 
     return (
@@ -151,7 +157,7 @@ export const SongList: React.FC<SongListProps> = ({ onEdit, onNew, onSettings })
                     filteredSongs.map((song) => (
                         <div
                             key={song.id}
-                            onClick={() => onEdit(song.id)}
+                            onClick={() => onView(song.id)}
                             style={{
                                 backgroundColor: 'var(--bg-secondary)',
                                 padding: '1.25rem 1.5rem',
@@ -183,28 +189,52 @@ export const SongList: React.FC<SongListProps> = ({ onEdit, onNew, onSettings })
                                     </span>
                                 )}
                             </div>
-                            <button
-                                onClick={(e) => deleteSong(e, song.id)}
-                                style={{
-                                    backgroundColor: 'transparent',
-                                    color: '#ff6b6b',
-                                    border: '1px solid transparent',
-                                    padding: '0.5rem 0.75rem',
-                                    fontSize: '0.85rem',
-                                    borderRadius: '8px',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
-                                    e.currentTarget.style.borderColor = 'rgba(255, 107, 107, 0.2)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'transparent';
-                                    e.currentTarget.style.borderColor = 'transparent';
-                                }}
-                            >
-                                Delete
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button
+                                    onClick={(e) => handleEdit(e, song.id)}
+                                    style={{
+                                        backgroundColor: 'transparent',
+                                        color: 'var(--accent)',
+                                        border: '1px solid transparent',
+                                        padding: '0.5rem 0.75rem',
+                                        fontSize: '0.85rem',
+                                        borderRadius: '8px',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(74, 158, 255, 0.1)';
+                                        e.currentTarget.style.borderColor = 'rgba(74, 158, 255, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                        e.currentTarget.style.borderColor = 'transparent';
+                                    }}
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={(e) => deleteSong(e, song.id)}
+                                    style={{
+                                        backgroundColor: 'transparent',
+                                        color: '#ff6b6b',
+                                        border: '1px solid transparent',
+                                        padding: '0.5rem 0.75rem',
+                                        fontSize: '0.85rem',
+                                        borderRadius: '8px',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                                        e.currentTarget.style.borderColor = 'rgba(255, 107, 107, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                        e.currentTarget.style.borderColor = 'transparent';
+                                    }}
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     ))
                 )}

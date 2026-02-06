@@ -1,27 +1,33 @@
 import { useState } from 'react';
 import { SongList } from './components/SongList';
 import { SongEditor } from './components/SongEditor';
+import { SongViewer } from './components/SongViewer';
 import { Settings } from './components/Settings';
 
-type View = 'list' | 'editor' | 'settings';
+type View = 'list' | 'editor' | 'viewer' | 'settings';
 
 function App() {
     const [view, setView] = useState<View>('list');
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [activeId, setActiveId] = useState<string | null>(null);
 
-    const handleEdit = (id: string) => {
-        setEditingId(id);
+    const handleView = (id: string) => {
+        setActiveId(id);
+        setView('viewer');
+    };
+
+    const handleEdit = (id: string | null) => {
+        setActiveId(id);
         setView('editor');
     };
 
     const handleNew = () => {
-        setEditingId(null);
+        setActiveId(null);
         setView('editor');
     };
 
     const handleBack = () => {
         setView('list');
-        setEditingId(null);
+        setActiveId(null);
     };
 
     const handleSettings = () => {
@@ -43,9 +49,11 @@ function App() {
 
             <div style={{ marginTop: '32px' }}>
                 {view === 'list' ? (
-                    <SongList onEdit={handleEdit} onNew={handleNew} onSettings={handleSettings} />
+                    <SongList onView={handleView} onEdit={handleEdit} onNew={handleNew} onSettings={handleSettings} />
                 ) : view === 'editor' ? (
-                    <SongEditor songId={editingId} onBack={handleBack} />
+                    <SongEditor songId={activeId} onBack={(id) => handleView(id)} onCancel={handleBack} />
+                ) : view === 'viewer' ? (
+                    <SongViewer songId={activeId!} onBack={handleBack} onEdit={handleEdit} />
                 ) : (
                     <Settings onBack={handleBack} />
                 )}

@@ -4,7 +4,8 @@ import { BlockEditor } from './BlockEditor';
 
 interface SongEditorProps {
     songId: string | null;
-    onBack: () => void;
+    onBack: (id: string) => void;
+    onCancel: () => void;
 }
 
 const emptySong = (): Song => ({
@@ -19,7 +20,7 @@ const emptySong = (): Song => ({
     sections: []
 });
 
-export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack }) => {
+export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel }) => {
     const [song, setSong] = useState<Song>(emptySong());
     const [loading, setLoading] = useState(false);
 
@@ -45,7 +46,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack }) => {
             return;
         }
         await window.api.saveSong(song);
-        onBack();
+        onBack(song.id);
     };
 
     const addSection = () => {
@@ -105,7 +106,10 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack }) => {
     return (
         <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto', paddingBottom: '100px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                <button onClick={onBack}>&larr; Back</button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={() => onBack(song.id)} style={{ background: 'none', border: '1px solid var(--border)' }}>&larr; Back</button>
+                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: '#888' }}>Cancel</button>
+                </div>
                 <button onClick={handleSave} style={{ backgroundColor: 'var(--accent)' }}>Save Song</button>
             </div>
 
