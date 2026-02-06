@@ -51,6 +51,7 @@ export interface SongMetadata {
 
 export interface AppSettings {
     storagePath: string | null; // null = use default
+    disableSaveWarning: boolean;
 }
 
 export interface ElectronAPI {

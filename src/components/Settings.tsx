@@ -31,6 +31,18 @@ export function Settings({ onBack }: SettingsProps) {
         }
     };
 
+    const handleToggleWarning = async () => {
+        if (!settings) return;
+        try {
+            const newSettings: AppSettings = { ...settings, disableSaveWarning: !settings.disableSaveWarning };
+            await window.api.updateSettings(newSettings);
+            setSettings(newSettings);
+        } catch (error) {
+            console.error('Error toggling warning:', error);
+            setMessage({ text: 'Failed to update preference', type: 'error' });
+        }
+    };
+
     const handleChangePath = async () => {
         try {
             const newPath = await window.api.selectStoragePath();
@@ -43,7 +55,7 @@ export function Settings({ onBack }: SettingsProps) {
             const oldPath = settings?.storagePath || defaultPath;
 
             // Update settings
-            const newSettings: AppSettings = { storagePath: newPath };
+            const newSettings: AppSettings = { ...settings!, storagePath: newPath };
             await window.api.updateSettings(newSettings);
 
             // Migrate data
@@ -73,7 +85,7 @@ export function Settings({ onBack }: SettingsProps) {
             const oldPath = settings?.storagePath;
 
             // Update settings to default
-            const newSettings: AppSettings = { storagePath: null };
+            const newSettings: AppSettings = { ...settings!, storagePath: null };
             await window.api.updateSettings(newSettings);
 
             // Migrate data if there was a custom path
@@ -139,6 +151,42 @@ export function Settings({ onBack }: SettingsProps) {
                     {message.text}
                 </div>
             )}
+
+            <div style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                marginBottom: '1.5rem'
+            }}>
+                <h2 style={{ marginTop: 0, fontSize: '1.25rem', marginBottom: '1rem' }}>Preferences</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer' }} onClick={handleToggleWarning}>
+                    <div style={{
+                        width: '40px',
+                        height: '24px',
+                        backgroundColor: settings.disableSaveWarning ? 'var(--accent)' : 'rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        position: 'relative',
+                        transition: 'background-color 0.2s'
+                    }}>
+                        <div style={{
+                            width: '18px',
+                            height: '18px',
+                            backgroundColor: 'white',
+                            borderRadius: '50%',
+                            position: 'absolute',
+                            top: '3px',
+                            left: settings.disableSaveWarning ? '19px' : '3px',
+                            transition: 'left 0.2s'
+                        }} />
+                    </div>
+                    <div>
+                        <div style={{ fontWeight: '500' }}>Disable Save Warning</div>
+                        <div style={{ fontSize: '0.85rem', color: '#b0b0b0' }}>
+                            Don't ask for confirmation when leaving the editor with unsaved changes.
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div style={{
                 background: 'rgba(255, 255, 255, 0.05)',

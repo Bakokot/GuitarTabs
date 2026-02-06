@@ -6,7 +6,8 @@ import { AppSettings } from '../../src/types';
 const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings.json');
 
 const DEFAULT_SETTINGS: AppSettings = {
-    storagePath: null, // null means use default userData/data
+    storagePath: null,
+    disableSaveWarning: false,
 };
 
 // Ensure settings file exists
@@ -22,7 +23,8 @@ export async function getSettings(): Promise<AppSettings> {
     await ensureSettingsFile();
     try {
         const data = await fs.readFile(SETTINGS_FILE, 'utf-8');
-        return JSON.parse(data);
+        const settings = JSON.parse(data);
+        return { ...DEFAULT_SETTINGS, ...settings };
     } catch (error) {
         console.error('Error reading settings:', error);
         return DEFAULT_SETTINGS;

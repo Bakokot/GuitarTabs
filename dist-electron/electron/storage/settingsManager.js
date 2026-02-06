@@ -42,7 +42,8 @@ const path = __importStar(require("path"));
 const fs = __importStar(require("fs/promises"));
 const SETTINGS_FILE = path.join(electron_1.app.getPath('userData'), 'settings.json');
 const DEFAULT_SETTINGS = {
-    storagePath: null, // null means use default userData/data
+    storagePath: null,
+    disableSaveWarning: false,
 };
 // Ensure settings file exists
 async function ensureSettingsFile() {
@@ -57,7 +58,8 @@ async function getSettings() {
     await ensureSettingsFile();
     try {
         const data = await fs.readFile(SETTINGS_FILE, 'utf-8');
-        return JSON.parse(data);
+        const settings = JSON.parse(data);
+        return { ...DEFAULT_SETTINGS, ...settings };
     }
     catch (error) {
         console.error('Error reading settings:', error);

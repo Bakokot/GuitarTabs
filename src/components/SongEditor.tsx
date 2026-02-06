@@ -23,18 +23,30 @@ const emptySong = (): Song => ({
 export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel }) => {
     const [song, setSong] = useState<Song>(emptySong());
     const [loading, setLoading] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+    const [settings, setSettings] = useState<any>(null);
+    const [showExitModal, setShowExitModal] = useState(false);
 
     useEffect(() => {
+        loadSettings();
         if (songId) {
             loadSong(songId);
         }
     }, [songId]);
 
+    const loadSettings = async () => {
+        const s = await window.api.getSettings();
+        setSettings(s);
+    };
+
     const loadSong = async (id: string) => {
         setLoading(true);
         try {
             const data = await window.api.getSong(id);
-            if (data) setSong(data);
+            if (data) {
+                setSong(data);
+                setIsDirty(false);
+            }
         } finally {
             setLoading(false);
         }
@@ -46,7 +58,21 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel
             return;
         }
         await window.api.saveSong(song);
+        setIsDirty(false);
         onBack(song.id);
+    };
+
+    const handleLeave = (action: () => void) => {
+        if (isDirty && settings && !settings.disableSaveWarning) {
+            setShowExitModal(true);
+        } else {
+            action();
+        }
+    };
+
+    const updateSong = (updates: Partial<Song>) => {
+        setSong(prev => ({ ...prev, ...updates }));
+        setIsDirty(true);
     };
 
     const addSection = () => {
@@ -55,18 +81,17 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel
             name: 'New Section',
             blocks: []
         };
-        setSong({ ...song, sections: [...song.sections, newSection] });
+        updateSong({ sections: [...song.sections, newSection] });
     };
 
     const removeSection = (sectionId: string) => {
         if (confirm('Remove this section?')) {
-            setSong({ ...song, sections: song.sections.filter(s => s.id !== sectionId) });
+            updateSong({ sections: song.sections.filter(s => s.id !== sectionId) });
         }
     };
 
     const updateSection = (sectionId: string, updates: Partial<Section>) => {
-        setSong({
-            ...song,
+        updateSong({
             sections: song.sections.map(s => s.id === sectionId ? { ...s, ...updates } : s)
         });
     };
@@ -84,31 +109,127 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel
 
         const newSections = [...song.sections];
         newSections[sectionIndex].blocks.push(newBlock);
-        setSong({ ...song, sections: newSections });
+        updateSong({ sections: newSections });
     };
 
     const updateBlock = (sectionId: string, blockIndex: number, updatedBlock: Block) => {
         const newSections = [...song.sections];
         const sectionIndex = newSections.findIndex(s => s.id === sectionId);
         newSections[sectionIndex].blocks[blockIndex] = updatedBlock;
-        setSong({ ...song, sections: newSections });
+        updateSong({ sections: newSections });
     };
 
     const removeBlock = (sectionId: string, blockIndex: number) => {
         const newSections = [...song.sections];
         const sectionIndex = newSections.findIndex(s => s.id === sectionId);
         newSections[sectionIndex].blocks.splice(blockIndex, 1);
-        setSong({ ...song, sections: newSections });
+        updateSong({ sections: newSections });
     };
 
     if (loading) return <div>Loading...</div>;
 
     return (
         <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto', paddingBottom: '100px' }}>
+            {showExitModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.85)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000,
+                    backdropFilter: 'blur(8px)',
+                    animation: 'fadeIn 0.2s ease-out'
+                }}>
+                    <div style={{
+                        backgroundColor: 'var(--bg-secondary)',
+                        padding: '2.5rem',
+                        borderRadius: '20px',
+                        maxWidth: '450px',
+                        width: '90%',
+                        textAlign: 'center',
+                        boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+                        border: '1px solid var(--border)',
+                    }}>
+                        <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>💾</div>
+                        <h2 style={{ marginBottom: '1rem', marginTop: 0, fontSize: '1.75rem' }}>Unsaved Changes</h2>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', lineHeight: '1.6', fontSize: '1.05rem' }}>
+                            You have modified <strong>{song.title || 'this song'}</strong>. What would you like to do?
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <button
+                                onClick={handleSave}
+                                style={{
+                                    backgroundColor: 'var(--accent)',
+                                    color: 'white',
+                                    padding: '1rem',
+                                    fontSize: '1.05rem',
+                                    fontWeight: '600',
+                                    borderRadius: '12px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'transform 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                Save & View Song
+                            </button>
+                            <button
+                                onClick={onCancel}
+                                style={{
+                                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                                    color: '#ff6b6b',
+                                    border: '1px solid rgba(255, 107, 107, 0.2)',
+                                    padding: '1rem',
+                                    fontSize: '1rem',
+                                    fontWeight: '500',
+                                    borderRadius: '12px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.2)';
+                                    e.currentTarget.style.borderColor = '#ff6b6b';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                                    e.currentTarget.style.borderColor = 'rgba(255, 107, 107, 0.2)';
+                                }}
+                            >
+                                Discard & Back to Menu
+                            </button>
+                            <button
+                                onClick={() => setShowExitModal(false)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'var(--text-secondary)',
+                                    padding: '0.5rem',
+                                    fontSize: '0.95rem',
+                                    marginTop: '0.5rem',
+                                    cursor: 'pointer',
+                                    textDecoration: 'none',
+                                    opacity: 0.7
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                            >
+                                Keep Editing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button onClick={() => onBack(song.id)} style={{ background: 'none', border: '1px solid var(--border)' }}>&larr; Back</button>
-                    <button onClick={onCancel} style={{ background: 'none', border: 'none', color: '#888' }}>Cancel</button>
+                    <button onClick={() => handleLeave(() => onBack(song.id))} style={{ background: 'none', border: '1px solid var(--border)' }}>&larr; Back</button>
+                    <button onClick={() => handleLeave(onCancel)} style={{ background: 'none', border: 'none', color: '#888' }}>Cancel</button>
                 </div>
                 <button onClick={handleSave} style={{ backgroundColor: 'var(--accent)' }}>Save Song</button>
             </div>
@@ -118,7 +239,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel
                     <label>Title</label>
                     <input
                         value={song.title}
-                        onChange={e => setSong({ ...song, title: e.target.value })}
+                        onChange={e => updateSong({ title: e.target.value })}
                         style={{ width: '100%' }}
                         placeholder="Song Title"
                     />
@@ -127,7 +248,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel
                     <label>Artist</label>
                     <input
                         value={song.artist}
-                        onChange={e => setSong({ ...song, artist: e.target.value })}
+                        onChange={e => updateSong({ artist: e.target.value })}
                         style={{ width: '100%' }}
                         placeholder="Artist"
                     />
@@ -136,7 +257,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel
                     <label>Key</label>
                     <input
                         value={song.key}
-                        onChange={e => setSong({ ...song, key: e.target.value })}
+                        onChange={e => updateSong({ key: e.target.value })}
                         style={{ width: '100%' }}
                         placeholder="e.g. C Major"
                     />
@@ -146,7 +267,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ songId, onBack, onCancel
                     <input
                         type="number"
                         value={song.tempo}
-                        onChange={e => setSong({ ...song, tempo: parseInt(e.target.value) || 0 })}
+                        onChange={e => updateSong({ tempo: parseInt(e.target.value) || 0 })}
                         style={{ width: '100%' }}
                     />
                 </div>
